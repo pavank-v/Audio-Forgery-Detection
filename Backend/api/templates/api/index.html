@@ -1,0 +1,277 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Forgery Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        purple: {
+                            950: '#1E0A2E',
+                            900: '#240D38',
+                            800: '#381554',
+                            700: '#4C1A72',
+                            600: '#6A21A0',
+                            500: '#8424D0',
+                            400: '#A345FF',
+                            300: '#C278FF',
+                            200: '#E1BAFF',
+                            100: '#F3E5FF',
+                        },
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #171023;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(147, 51, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+        }
+
+        .glass-card {
+            background: rgba(40, 20, 60, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .file-drop-area {
+            border: 2px dashed rgba(168, 85, 247, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .file-drop-area:hover {
+            border-color: rgba(168, 85, 247, 0.8);
+            background: rgba(126, 58, 242, 0.1);
+        }
+
+        .glow-button {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glow-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(192, 132, 252, 0.4) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .glow-button:hover::after {
+            opacity: 1;
+            animation: glow-pulse 2s infinite;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen text-gray-200">
+    <div class="container mx-auto px-4 py-10 max-w-6xl">
+        <div class="text-center mb-14">
+            <h1 class="text-5xl font-bold bg-gradient-to-r from-purple-400 to-violet-300 inline-block text-transparent bg-clip-text mb-2 pb-2">Audio Forgery Detection</h1>
+            <p class="text-purple-200 text-lg max-w-2xl mx-auto opacity-80">Advanced Deep Learning Model to Detect Audio Copy Move Forgery</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-1">
+                <form method="post" enctype="multipart/form-data" class="glass-card rounded-2xl p-6 shadow-xl h-full">
+                    {% csrf_token %}
+                    <div class="text-center mb-6">
+                        <div class="bg-purple-800/30 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-purple-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 18v-6a9 9 0 0 1 18 0v6"></path>
+                                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-semibold text-white mb-1">Upload Audio</h2>
+                        <p class="text-purple-200 opacity-60 text-sm">Supported formats: MP3, WAV, M4A, FLAC</p>
+                    </div>
+                    
+                    <div class="mb-8">
+                        <div class="file-drop-area rounded-xl p-8 text-center">
+                            <input type="file" name="audio_file" id="audio_file" accept="audio/*" required class="hidden">
+                            <label for="audio_file" class="cursor-pointer">
+                                <div class="flex flex-col items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                    <span class="text-lg font-medium text-purple-200">Drop your file here</span>
+                                    <span class="text-sm text-purple-300/60 mt-2">or click to browse</span>
+                                </div>
+                            </label>
+                            <p id="file-name" class="mt-4 text-sm text-purple-300 font-medium"></p>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-violet-500 text-white py-4 px-6 rounded-xl hover:from-purple-500 hover:to-violet-400 transition duration-300 font-semibold shadow-lg relative overflow-hidden glow-button">
+                        <span class="relative z-10 flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            Analyze Audio
+                        </span>
+                    </button>
+                    
+                    <div class="mt-6 text-center">
+                        <p class="text-xs text-purple-300/60">
+                            Our Model will analyze audio spectral patterns to detect forgery
+                        </p>
+                    </div>
+                </form>
+            </div>
+
+            <div class="lg:col-span-2">
+                {% if spectrogram_image and graph_image %}
+                <div class="glass-card rounded-2xl p-6 shadow-xl h-full">
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-semibold text-white mb-2">Analysis Results</h2>
+                        
+                        {% if prediction %}
+                        <div class="mb-4">
+                            <span class="inline-flex items-center">
+                                {% if prediction == 'Forged' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                </svg>
+                                <span class="text-red-400 font-semibold">Forged:</span>
+                                <span class="text-purple-200 ml-2">This audio contains evidence of manipulation</span>
+                                {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span class="text-green-400 font-semibold">Authentic:</span>
+                                <span class="text-purple-200 ml-2">This audio appears to be authentic</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% endif %}
+                        
+                        <p class="text-purple-200 opacity-60 text-sm">DL-powered audio forensic analysis</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-purple-950/80 rounded-xl p-5 shadow-lg card-hover border border-purple-800/30">
+                            <h3 class="text-lg font-medium text-purple-200 mb-3">Super-Resolution Spectrogram</h3>
+                            <img src="{% static spectrogram_image %}" alt="Spectrogram" class="w-80 h-60 rounded-lg">
+                            <p class="mt-3 text-xs text-purple-300/60">
+                                High-resolution frequency analysis revealing audio patterns
+                            </p>
+                        </div>
+                        
+                        <div class="bg-purple-950/80 rounded-xl p-5 shadow-lg card-hover border border-purple-800/30">
+                            <h3 class="text-lg font-medium text-purple-200 mb-3">Network Graph</h3>
+                            <img src="{% static graph_image %}" alt="Graph Image" class="w-80 h-60 rounded-lg">
+                            <p class="mt-3 text-xs text-purple-300/60">
+                                Network visualization of detected audio anomalies
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="glass-card rounded-2xl p-6 shadow-xl h-full flex flex-col items-center justify-center text-center">
+                    <div class="bg-purple-800/20 rounded-full w-20 h-20 flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-purple-300 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-semibold text-white mb-3">No Analysis Yet</h2>
+                    <p class="text-purple-200 opacity-70 max-w-md">
+                        Upload an audio file to see detailed analysis results and forensic evaluation. 
+                        Our Model will process the audio patterns to detect signs of manipulation.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-16 text-center">
+            <p class="text-sm text-purple-300/60">
+                Our advanced model analyzes spectrogram patterns and graphs to detect audio forgeries with high accuracy
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('audio_file').addEventListener('change', function (e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+            document.getElementById('file-name').textContent = fileName;
+        });
+
+        const dropArea = document.querySelector('.file-drop-area');
+        const fileInput = document.getElementById('audio_file');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            dropArea.classList.add('bg-purple-800/20');
+        }
+        
+        function unhighlight() {
+            dropArea.classList.remove('bg-purple-800/20');
+        }
+
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            fileInput.files = files;
+            
+            const fileName = files[0] ? files[0].name : 'No file selected';
+            document.getElementById('file-name').textContent = fileName;
+        }
+    </script>
+</body>
+
+</html>
